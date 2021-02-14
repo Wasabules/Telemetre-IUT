@@ -6,11 +6,11 @@ byte selectDigit[4] = {0b000111, 0b001011, 0b001101, 0b001110};                 
 int nombre;
 int digitOn = 0;
 
-int distance(){
+float distance(){
   PORTD |= (1 << PD2);
   delayMicroseconds(10);
   PORTD &=~ (1 << PD2);
-  int lecture_echo = pulseIn(PD3, HIGH);
+  float lecture_echo = pulseIn(PD3, HIGH);
   return (lecture_echo/58);
 }
 
@@ -41,7 +41,20 @@ ISR(TIMER1_OVF_vect){       // Permet l'affichage des digits de façon fluide et
   }
 }
 
-int tempsEnvoi, tempsSignal;
+/* int sommeNombre, moyenneNombre;
+
+double readDistance(){
+  double moyenne;
+  double moyenneFinal;
+  moyenne = 0;
+  for (int j =0; j<100; j++) 
+  {
+    moyenne = moyenne + distance();
+  }
+  
+  moyenneFinal = moyenne/100;
+  return moyenneFinal;
+} */
 
 void setupTimer7digit(){
   TIMSK1 |= (1 << TOIE1);                 // Activation de l'interruption par overflow du Timer 1
@@ -52,26 +65,23 @@ void setupTimer7digit(){
 
 void setupPort(){
   // Setup du 7 digit
-  DDRC = 0b1111111;     // Mise en sortie du port C pour les chiffres des digitis
-  DDRB = 0b111111;      // Mise en sortie du port B pour la selection des digits 
-  PORTC = 0b0000000;    // Mise à 0 des sorties
-  PORTB = 0b000000;     // Mise à 0 des sorties
+  DDRC = 0b1111111;         // Mise en sortie du port C pour les chiffres des digitis
+  DDRB = 0b111111;          // Mise en sortie du port B pour la selection des digits 
+  PORTC = 0b0000000;        // Mise à 0 des sorties
+  PORTB = 0b000000;         // Mise à 0 des sorties
 
   // Setup du module ultra son
-  DDRD |= (1 << PD2);   // Mise en sortie PD2 pour le "Trigger" du module ultra son
-  DDRD &=~ (1 << PD3);  // Mise en entrée PD3 pour le "Echo" du module ultra son
+  DDRD |= (1 << PD2);       // Mise en sortie PD2 pour le "Trigger" du module ultra son
+  DDRD &=~ (1 << PD3);      // Mise en entrée PD3 pour le "Echo" du module ultra son
 }
 
 void setup() {
   Serial.begin(9600);
   setupPort();
   setupTimer7digit();
-
   Serial.println("Démarrage");
 }
 
 void loop() {
-  nombre = distance();
-  Serial.print("Distance : ");
-  Serial.println(nombre);
+  nombre = distance()*100;
 }
