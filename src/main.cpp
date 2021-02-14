@@ -6,7 +6,7 @@ byte selectDigit[4] = {0b000111, 0b001011, 0b001101, 0b001110};                 
 int nombre;
 int digitOn = 0;
 
-float distance(){
+float distance(){   // Retourne la valeur de la distance en cm (2 chiffre après virgule)
   PORTD |= (1 << PD2);
   delayMicroseconds(10);
   PORTD &=~ (1 << PD2);
@@ -14,12 +14,12 @@ float distance(){
   return (lecture_echo/58);
 }
 
-void afficheur(int digit, int numero){    // 
+void afficheur(int digit, int numero){    // Affiche un numéro sur un digit
   PORTB = selectDigit[digit];
   PORTC = chiffres[numero];
 }
 
-ISR(TIMER1_OVF_vect){       // Permet l'affichage des digits de façon fluide et qui n'influe pas sur la vitesse du programme (du moins, c'est négligeable)
+ISR(TIMER1_OVF_vect){         // Permet l'affichage des digits de façon fluide et qui n'influe pas sur la vitesse du programme (du moins, c'est négligeable)
   switch(digitOn)
   {
     case 3:
@@ -56,14 +56,14 @@ double readDistance(){
   return moyenneFinal;
 } */
 
-void setupTimer7digit(){
+void setupTimer7digit(){      // Configure le timer dédié aux 4 digits
   TIMSK1 |= (1 << TOIE1);                 // Activation de l'interruption par overflow du Timer 1
   TCNT1 = 0;                              // Mise à 0 du compteur
   TCCR1B = (1 << CS11) | (1 << CS10);     // Selection du prescaler du timer1 (/64), celui-ci changera directement la fréquence de rafraichissement des digits
   sei();                                  // Autorisation des interruptions
 }
 
-void setupPort(){
+void setupPort(){             // Configure les ports pour les Digits & Module Ultra son
   // Setup du 7 digit
   DDRC = 0b1111111;         // Mise en sortie du port C pour les chiffres des digitis
   DDRB = 0b111111;          // Mise en sortie du port B pour la selection des digits 
@@ -75,7 +75,7 @@ void setupPort(){
   DDRD &=~ (1 << PD3);      // Mise en entrée PD3 pour le "Echo" du module ultra son
 }
 
-void setup() {
+void setup() {  
   Serial.begin(9600);
   setupPort();
   setupTimer7digit();
