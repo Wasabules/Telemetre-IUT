@@ -6,12 +6,23 @@ byte selectDigit[4] = {0b000111, 0b001011, 0b001101, 0b001110};                 
 int nombre;
 int digitOn = 0;
 
+int receptionSignal,tempsEmis, finSignal;
+
 float distance(){   // Retourne la valeur de la distance en cm (2 chiffre après virgule)
   PORTD |= (1 << PD2);
   delayMicroseconds(10);
   PORTD &=~ (1 << PD2);
-  float lecture_echo = pulseIn(PD3, HIGH);
-  return (lecture_echo/58);
+
+  
+  while(bit_is_clear(PIND,PD3));    // On attend que le niveau soit haut
+  receptionSignal = micros();       // On note le temps
+  while(bit_is_set(PIND,PD3));      // On attend que le niveau repasse à bas
+  finSignal = micros();             // On note le temps de fin
+
+  tempsEmis = finSignal - receptionSignal;  // On obtient la période du signal
+
+  Serial.println(tempsEmis);
+  return (tempsEmis/58);            // En divisant par 58, on retourne la valeur en centimètre
 }
 
 void afficheur(int digit, int numero){    // Affiche un numéro sur un digit
@@ -84,4 +95,5 @@ void setup() {
 
 void loop() {
   nombre = distance()*100;
+  delay(500);
 }
