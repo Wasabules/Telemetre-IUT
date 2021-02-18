@@ -95,5 +95,5 @@ void setup() {
 
 void loop() {
   nombre = distance()*100;
-  delay(500);
+  delay(100);
 }
