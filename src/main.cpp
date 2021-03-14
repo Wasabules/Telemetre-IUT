@@ -11,10 +11,10 @@
 
 byte chiffres[10] = {0b00111111,0b00000110,0b00011011,0b01001111,0b00100110,0b01101101,0b01111101,0b00000111,0b01111111,0b01101111};    // Table de transcodage des chiffres sur les digits
 byte selectDigit[4] = {0b00000111, 0b00001011, 0b00001101, 0b00001110};                                                               // Table de transcodage du digit à allumer/sélectionner
-int nombre;
-int digitOn = 0;
+int unsigned nombre;
+unsigned char digitOn = 0;
 
-int receptionSignal,tempsEmis, finSignal;
+int unsigned receptionSignal,tempsEmis, finSignal;
 
 float distance(){   // Retourne la valeur de la distance en cm (2 chiffre après virgule)
   PORTB |= (1 << trigger);
@@ -25,16 +25,13 @@ float distance(){   // Retourne la valeur de la distance en cm (2 chiffre après
   while(bit_is_clear(PINB,echo));    // On attend que le niveau soit haut
   receptionSignal = micros();       // On note le temps
   while(bit_is_set(PINB,echo));      // On attend que le niveau repasse à bas
-  finSignal = micros();             // On note le temps de fin
-
-  tempsEmis = finSignal - receptionSignal;  // On obtient la période du signal
+  tempsEmis = micros()  - receptionSignal;  // On obtient la période du signal
 
   float resultat = static_cast<float>(tempsEmis)/58;
-  Serial.println(resultat);
   return (resultat);            // En divisant par 58, on retourne la valeur en centimètre
 }
 
-void afficheur(int digit, int numero){    // Affiche un numéro sur un digit
+void afficheur(unsigned char digit, unsigned int numero){    // Affiche un numéro sur un digit
   PORTB = selectDigit[digit];
   PORTA = chiffres[numero];
 }
@@ -79,12 +76,14 @@ void setupPort(){             // Configure les ports pour les Digits & Module Ul
   DDRB &=~ (1 << echo);      // Mise en entrée PD3 pour le "Echo" du module ultra son
 }
 
-void setup() { 
+ int main() { 
   setupPort();
   setupTimer7digit();
-}
 
-void loop() {
-  nombre = distance()*100;
-  delay(100);
+  while(1) {
+    nombre = distance()*100;
+    delay(100);
+  }
+
+  return 0;
 }
