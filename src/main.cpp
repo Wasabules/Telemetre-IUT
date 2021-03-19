@@ -1,8 +1,9 @@
-#define F_CPU 8000000UL
+#define clockCyclesPerMicrosecond() ( F_CPU / 1000000L )
 
 #include <util/delay.h>
 #include <avr/io.h>
 #include <avr/delay.h>
+#include <avr/interrupt.h>
 
 #define Dig1 PB0
 #define Dig2 PB1
@@ -16,6 +17,7 @@ char chiffres[10] = {0b00111111,0b00000110,0b00011011,0b01001111,0b00100110,0b01
 char selectDigit[4] = {0b00000111, 0b00001011, 0b00001101, 0b00001110};                                                               // Table de transcodage du digit à allumer/sélectionner
 int unsigned nombre;
 unsigned char digitOn = 0;
+int unsigned timer0_overflow_count;
 
 int unsigned receptionSignal,tempsEmis, finSignal;
 
@@ -26,9 +28,9 @@ float distance(){   // Retourne la valeur de la distance en cm (2 chiffre après
 
   
   while(bit_is_clear(PINB,echo));    // On attend que le niveau soit haut
-  receptionSignal = micros();       // On note le temps
+  //receptionSignal = micros();       // On note le temps
   while(bit_is_set(PINB,echo));      // On attend que le niveau repasse à bas
-  tempsEmis = micros()  - receptionSignal;  // On obtient la période du signal
+  //tempsEmis = micros() - receptionSignal;  // On obtient la période du signal
 
   float resultat = (float)tempsEmis/58.0;
   return (resultat);            // En divisant par 58, on retourne la valeur en centimètre
@@ -38,6 +40,8 @@ void afficheur(unsigned char digit, unsigned int numero){    // Affiche un numé
   PORTB = selectDigit[digit];
   PORTA = chiffres[numero];
 }
+
+
 
 ISR(TIMER1_OVF_vect){         // Permet l'affichage des digits de façon fluide et qui n'influe pas sur la vitesse du programme (du moins, c'est négligeable)
   switch(digitOn)
@@ -61,7 +65,7 @@ ISR(TIMER1_OVF_vect){         // Permet l'affichage des digits de façon fluide 
   }
 }
 
-void setupTimer7digit(){      // Configure le timer dédié aux 4 digits
+void setupTimer7digit(){          // Configure le timer dédié aux 4 digits
   TIMSK |= (1 << TOIE1);                 // Activation de l'interruption par overflow du Timer 1
   TCNT1 = 0;                              // Mise à 0 du compteur
   TCCR1B = (1 << CS12) | (1 << CS11) | (1 << CS10);     // Selection du prescaler du timer1 (/64), celui-ci changera directement la fréquence de rafraichissement des digits
