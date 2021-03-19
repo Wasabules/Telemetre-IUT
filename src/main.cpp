@@ -1,6 +1,9 @@
-#include <Arduino.h>
+#define F_CPU 8000000UL
+
 #include <util/delay.h>
-  
+#include <avr/io.h>
+#include <avr/delay.h>
+
 #define Dig1 PB0
 #define Dig2 PB1
 #define Dig3 PB2
@@ -9,8 +12,8 @@
 #define echo PB5
 #define bouton BP6
 
-byte chiffres[10] = {0b00111111,0b00000110,0b00011011,0b01001111,0b00100110,0b01101101,0b01111101,0b00000111,0b01111111,0b01101111};    // Table de transcodage des chiffres sur les digits
-byte selectDigit[4] = {0b00000111, 0b00001011, 0b00001101, 0b00001110};                                                               // Table de transcodage du digit à allumer/sélectionner
+char chiffres[10] = {0b00111111,0b00000110,0b00011011,0b01001111,0b00100110,0b01101101,0b01111101,0b00000111,0b01111111,0b01101111};    // Table de transcodage des chiffres sur les digits
+char selectDigit[4] = {0b00000111, 0b00001011, 0b00001101, 0b00001110};                                                               // Table de transcodage du digit à allumer/sélectionner
 int unsigned nombre;
 unsigned char digitOn = 0;
 
@@ -18,7 +21,7 @@ int unsigned receptionSignal,tempsEmis, finSignal;
 
 float distance(){   // Retourne la valeur de la distance en cm (2 chiffre après virgule)
   PORTB |= (1 << trigger);
-  delayMicroseconds(10);
+  _delay_us(10);
   PORTB &=~ (1 << trigger);
 
   
@@ -27,7 +30,7 @@ float distance(){   // Retourne la valeur de la distance en cm (2 chiffre après
   while(bit_is_set(PINB,echo));      // On attend que le niveau repasse à bas
   tempsEmis = micros()  - receptionSignal;  // On obtient la période du signal
 
-  float resultat = static_cast<float>(tempsEmis)/58;
+  float resultat = (float)tempsEmis/58.0;
   return (resultat);            // En divisant par 58, on retourne la valeur en centimètre
 }
 
@@ -82,7 +85,7 @@ void setupPort(){             // Configure les ports pour les Digits & Module Ul
 
   while(1) {
     nombre = distance()*100;
-    delay(100);
+    _delay_ms(100);
   }
 
   return 0;
