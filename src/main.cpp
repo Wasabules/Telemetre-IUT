@@ -1,5 +1,3 @@
-#define clockCyclesPerMicrosecond() ( F_CPU / 1000000L )
-
 #include <util/delay.h>
 #include <avr/io.h>
 #include <avr/delay.h>
