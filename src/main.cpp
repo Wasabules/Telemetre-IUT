@@ -21,7 +21,7 @@ int unsigned number;
 unsigned char digitOn = 0;
 int unsigned timer_distance = 0;
 int unsigned distanceAvg, distanceSum;
-int counter;
+int counter=0;
 
 
 int distance()
