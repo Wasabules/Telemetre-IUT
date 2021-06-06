@@ -28,17 +28,17 @@ int distance()
 { // Retourne la valeur de la distance en cm (2 chiffre après virgule)
 
   timer_distance=0;
-  PORTB |= (1 << trigger);
+  PORTB |= (1 << trigger);    // Lance un signal dans le trigger du capteur ultrason
   _delay_us(100);
-  PORTB &=~ (1 << trigger);
+  PORTB &=~ (1 << trigger);   // Arrête de ce signal
   
-  loop_until_bit_is_set(PINB, echo);
+  loop_until_bit_is_set(PINB, echo);  // Tant que la broche echo n'a pas de signal, on attend
     
-  TIMSK |= (1 << OCIE0A);
-  loop_until_bit_is_clear(PINB, echo);
+  TIMSK |= (1 << OCIE0A);             // Active l'interruption du Timer
+  loop_until_bit_is_clear(PINB, echo);  // Tant que la broche echo n'est pas de nouveau à 0, on attend (le timer compte)
 
-  TIMSK &= ~(1 << OCIE0A);
-  return timer_distance;
+  TIMSK &= ~(1 << OCIE0A);            // Désactive à nouveau l'interruption
+  return timer_distance;              // Retourne la valeur de la distance
 
   // En divisant par 58, on retourne la valeur en centimètre
 
@@ -119,7 +119,7 @@ void setupInterrupt(){
   GIMSK |= 1 << INT0;
 }
 
-void shutdown(){
+void shutdown(){    // Fonction de mise en arrêt
   DDRB = 0;
   DDRA = 0;
   sleep_mode();
